@@ -71,13 +71,13 @@ public:
 
 
 		topicSub_ft_raw_ = n_.subscribe("ft_raw", 1, &FTCalibNode::topicCallback_ft_raw, this);
-		topicSub_Accelerometer_ = n_.subscribe("imu", 1, &FTCalibNode::topicCallback_imu, this);
+		//topicSub_Accelerometer_ = n_.subscribe("imu", 1, &FTCalibNode::topicCallback_imu, this);
 
 		m_pose_counter = 0;
 		m_ft_counter = 0;
 
 		m_received_ft = false;
-		m_received_imu = false;
+		//m_received_imu = false;
 
 		m_finished = false;
 		m_tf_listener = new tf::TransformListener();
@@ -363,6 +363,7 @@ public:
 
         std::stringstream meas_file_text;
 
+        //std::cout << "gravity: " << gravity.vector.x << " " << gravity.vector.y << " " << gravity.vector.z << std::endl;
         meas_file_text << gravity.vector.x << " " << gravity.vector.y << " " << gravity.vector.z << " ";
         meas_file_text << ft_meas.wrench.force.x << " " << ft_meas.wrench.force.y << " " << ft_meas.wrench.force.z << " ";
         meas_file_text << ft_meas.wrench.torque.x << " " << ft_meas.wrench.torque.y << " " << ft_meas.wrench.torque.z << "\n";
@@ -387,13 +388,13 @@ public:
 
 
 	// gets readings from accelerometer and transforms them to the FT sensor frame
-	void topicCallback_imu(const sensor_msgs::Imu::ConstPtr &msg)
-	{
-		ROS_DEBUG("In accelerometer read callback");
+	// void topicCallback_imu(const sensor_msgs::Imu::ConstPtr &msg)
+	// {
+	// 	ROS_DEBUG("In accelerometer read callback");
 
-		m_imu= *msg;
-		m_received_imu = true;
-	}
+	// 	m_imu= *msg;
+	// 	m_received_imu = true;
+	// }
 
 	void addMeasurement()
 	{
@@ -415,23 +416,30 @@ public:
 			return;
 		}
 
-		if(!m_received_imu)
-		{
-			ROS_ERROR("Haven't received accelerometer readings");
-			return;
-		}
+		// if(!m_received_imu)
+		// {
+		// 	ROS_ERROR("Haven't received accelerometer readings");
+		// 	return;
+		// }
 
 		// express gravity vector in F/T sensor frame
 		geometry_msgs::Vector3Stamped gravity;
 		gravity.header.stamp = ros::Time();
-		gravity.header.frame_id = m_imu.header.frame_id;
-		gravity.vector = m_imu.linear_acceleration;
+		// Change this to avoid using imu
+		//gravity.header.frame_id = m_imu.header.frame_id;
+		// gravity.vector = m_imu.linear_acceleration;
+		gravity.header.frame_id = "base_link";
+		gravity.vector.x = 0.0;
+		gravity.vector.y = 0.0;
+		gravity.vector.z = -0.98;
 
 		geometry_msgs::Vector3Stamped gravity_ft_frame;
 
 		try
 		{
+			// m_tf_listener->transformVector(m_ft_raw.header.frame_id, gravity, gravity_ft_frame);
 			m_tf_listener->transformVector(m_ft_raw.header.frame_id, gravity, gravity_ft_frame);
+			ROS_INFO("grav: %f; %f : %f", gravity_ft_frame.vector.x, gravity_ft_frame.vector.y, gravity_ft_frame.vector.z);
 		}
 
 		catch(tf::TransformException &ex)
@@ -508,7 +516,7 @@ private:
 	bool m_finished;
 
 	bool m_received_ft;
-	bool m_received_imu;
+	//bool m_received_imu;
 
 	// ft calib stuff
 	FTCalib *m_ft_calib;
@@ -518,7 +526,7 @@ private:
 	geometry_msgs::WrenchStamped m_ft_avg; // average over 100 measurements
 
 	// accelerometer readings
-	sensor_msgs::Imu m_imu;
+	//sensor_msgs::Imu m_imu;
 
 	tf::TransformListener *m_tf_listener;
 
@@ -574,7 +582,7 @@ int main(int argc, char **argv)
 
 	// waiting time after end of each pose to take F/T measurements
 	double wait_time;
-	ft_calib_node.n_.param("wait_time", wait_time, 4.0);
+	ft_calib_node.n_.param("wait_time", wait_time, 5.0);
 
 	bool ret = false;
 	unsigned int n_measurements = 0;

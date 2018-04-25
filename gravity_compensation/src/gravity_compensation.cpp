@@ -68,15 +68,23 @@ void GravityCompensation::Zero(const geometry_msgs::WrenchStamped &ft_raw,
 
 
 bool GravityCompensation::Compensate(const geometry_msgs::WrenchStamped &ft_zeroed,
-                                     const sensor_msgs::Imu &gravity,
+                                     //const sensor_msgs::Imu &gravity,
                                      geometry_msgs::WrenchStamped &ft_compensated)
 {
 
+    // geometry_msgs::Vector3Stamped g;
+    // g.vector = gravity.linear_acceleration;
+    // g.header = gravity.header;
+    // g.header.stamp = ros::Time();
     geometry_msgs::Vector3Stamped g;
-    g.vector = gravity.linear_acceleration;
-    g.header = gravity.header;
     g.header.stamp = ros::Time();
-
+    // Change this to avoid using imu
+    //gravity.header.frame_id = m_imu.header.frame_id;
+    // gravity.vector = m_imu.linear_acceleration;
+    g.header.frame_id = "base_link";
+    g.vector.x = 0.0;
+    g.vector.y = 0.0;
+    g.vector.z = -0.98;
     // convert the accelerometer reading to the F/T sensor frame
     geometry_msgs::Vector3Stamped g_ft_frame;
     try

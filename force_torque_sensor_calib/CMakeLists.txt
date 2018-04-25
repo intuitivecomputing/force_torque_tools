@@ -1,34 +1,30 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(force_torque_sensor_calib)
-
+add_definitions(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS cmake_modules roscpp sensor_msgs tf geometry_msgs moveit_core moveit_ros_planning moveit_ros_planning_interface tf_conversions eigen_conversions)
-find_package(Eigen3)
-if(NOT EIGEN3_FOUND)
-  # Fallback to cmake_modules
-  find_package(cmake_modules REQUIRED)
-  find_package(Eigen REQUIRED)
-  set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
-  set(EIGEN3_LIBRARIES ${EIGEN_LIBRARIES})  # Not strictly necessary as Eigen is head only
-  # Possibly map additional variables to the EIGEN3_ prefix.
-else()
-  set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
-endif()
-find_package(Boost REQUIRED system filesystem date_time thread)
+
+set (Boost_USE_STATIC_LIBS OFF) 
+set (Boost_MULTITHREADED ON) 
+set (Boost_USE_STATIC_RUNTIME OFF)
+# manually set lib to find thread
+set (BOOST_LIBRARYDIR "/usr/lib/x86_64-linux-gnu")
+find_package(cmake_modules REQUIRED)
+find_package(Eigen REQUIRED)
+find_package(Boost 1.58 REQUIRED COMPONENTS system filesystem date_time thread)
 
 catkin_package(
-  DEPENDS eigen
+  DEPENDS Eigen Boost
   CATKIN_DEPENDS roscpp sensor_msgs tf geometry_msgs moveit_core moveit_ros_planning moveit_ros_planning_interface eigen tf_conversions eigen_conversions
   INCLUDE_DIRS include
   LIBRARIES
 )
 
-add_definitions(-std=c++11)
 
+include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
+  ${Eigen_INCLUDE_DIRS}
 )
 
 file(GLOB_RECURSE HEADERS include/${PROJECT_NAME}/*.h)

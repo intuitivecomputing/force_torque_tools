@@ -58,7 +58,7 @@ public:
     // Assumes that the gripper has fixed mass and COM
     // relative to F/T sensor.
     bool Compensate(const geometry_msgs::WrenchStamped &ft_zeroed,
-                    const sensor_msgs::Imu &gravity,
+                    //const sensor_msgs::Imu &gravity,
                     geometry_msgs::WrenchStamped &ft_compensated);
 
 private:

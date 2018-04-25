@@ -52,7 +52,7 @@ public:
 	ros::NodeHandle n_;
 
 	// subscribe to accelerometer (imu) readings
-	ros::Subscriber topicSub_imu_;
+	//ros::Subscriber topicSub_imu_;
 	ros::Subscriber topicSub_ft_raw_;
 
 	ros::Publisher topicPub_ft_zeroed_;
@@ -68,13 +68,13 @@ public:
 		n_ = ros::NodeHandle("~");
 		m_g_comp_params  = new GravityCompensationParams();
 		m_g_comp = NULL;
-		m_received_imu = false;
+		//m_received_imu = false;
         m_calibrate_bias = false;
         m_calib_measurements = 0;
         m_ft_bias = Eigen::Matrix<double, 6, 1>::Zero();
 
 		// subscribe to accelerometer topic and raw F/T sensor topic
-		topicSub_imu_ = n_.subscribe("imu", 1, &GravityCompensationNode::topicCallback_imu, this);
+		//topicSub_imu_ = n_.subscribe("imu", 1, &GravityCompensationNode::topicCallback_imu, this);
 		topicSub_ft_raw_ = n_.subscribe("ft_raw", 1, &GravityCompensationNode::topicCallback_ft_raw, this);
 
 		// bias calibration service
@@ -242,36 +242,36 @@ public:
 		return true;
 	}
 
-	void topicCallback_imu(const sensor_msgs::Imu::ConstPtr &msg)
-	{
-		m_imu = *msg;
-		m_received_imu = true;
-	}
+	// void topicCallback_imu(const sensor_msgs::Imu::ConstPtr &msg)
+	// {
+	// 	m_imu = *msg;
+	// 	m_received_imu = true;
+	// }
 
 	void topicCallback_ft_raw(const geometry_msgs::WrenchStamped::ConstPtr &msg)
 	{
 		static int error_msg_count=0;
 
-		if(!m_received_imu)
-		{
-			ROS_ERROR("No Imu reading");
-			return;
-		}
+		// if(!m_received_imu)
+		// {
+		// 	ROS_ERROR("No Imu reading");
+		// 	return;
+		// }
 
-		if((ros::Time::now()-m_imu.header.stamp).toSec() > 0.1)
-		{
-			error_msg_count++;
-			if(error_msg_count % 10==0)
-				ROS_ERROR("Imu reading too old, not able to g-compensate ft measurement");
-			return;
-		}
+		// if((ros::Time::now()-m_imu.header.stamp).toSec() > 0.1)
+		// {
+		// 	error_msg_count++;
+		// 	if(error_msg_count % 10==0)
+		// 		ROS_ERROR("Imu reading too old, not able to g-compensate ft measurement");
+		// 	return;
+		// }
 
 		geometry_msgs::WrenchStamped ft_zeroed;
 		m_g_comp->Zero(*msg, ft_zeroed);
 		topicPub_ft_zeroed_.publish(ft_zeroed);
 
 		geometry_msgs::WrenchStamped ft_compensated;
-		m_g_comp->Compensate(ft_zeroed, m_imu, ft_compensated);
+		m_g_comp->Compensate(ft_zeroed, ft_compensated);
 		topicPub_ft_compensated_.publish(ft_compensated);
 
 		if(m_calibrate_bias)
