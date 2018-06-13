@@ -103,12 +103,12 @@ bool GravityCompensation::Compensate(const geometry_msgs::WrenchStamped &ft_zero
     double gripper_mass = m_g_comp_params->getGripperMass();
     Eigen::Vector3d g_ft_frame_eigen;
     tf::vectorMsgToEigen(g_ft_frame.vector, g_ft_frame_eigen);
-    std::cout << "eigen grav: " << g_ft_frame_eigen << std::endl;
+    //std::cout << "eigen grav: " << g_ft_frame_eigen << std::endl;
 
 
     Eigen::Matrix<double, 6, 1> gripper_wrench_eigen;
     gripper_wrench_eigen.topRows(3) = g_ft_frame_eigen*gripper_mass;
-    std::cout << "mass: " << gripper_wrench_eigen << std::endl;
+    //std::cout << "mass: " << gripper_wrench_eigen << std::endl;
 
     // grab the gripper_com
     tf::StampedTransform gripper_com_tf = m_g_comp_params->getGripperCOM();
